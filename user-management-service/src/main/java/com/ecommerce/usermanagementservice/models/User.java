@@ -3,6 +3,7 @@ package com.ecommerce.usermanagementservice.models;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -14,6 +15,7 @@ import java.time.Instant;
 @Setter
 @EntityListeners(AuditingEntityListener.class)
 @Entity
+@Table(name = "\"user\"")
 public class User extends BaseModel{
     private String email;
     private String name;
