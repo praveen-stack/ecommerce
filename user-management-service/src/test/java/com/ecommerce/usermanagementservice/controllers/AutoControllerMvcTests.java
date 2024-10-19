@@ -1,9 +1,13 @@
 package com.ecommerce.usermanagementservice.controllers;
 
+import com.ecommerce.usermanagementservice.Exceptions.InvalidCredentialsException;
 import com.ecommerce.usermanagementservice.Exceptions.UserExistsException;
 import com.ecommerce.usermanagementservice.configuration.SecurityConfig;
+import com.ecommerce.usermanagementservice.dtos.AuthenticatedUser;
 import com.ecommerce.usermanagementservice.dtos.ErrorResponseDto;
+import com.ecommerce.usermanagementservice.dtos.UserLoginDto;
 import com.ecommerce.usermanagementservice.dtos.UserSignupDto;
+import com.ecommerce.usermanagementservice.enums.AuthConstants;
 import com.ecommerce.usermanagementservice.mappers.UserDtoMapper;
 import com.ecommerce.usermanagementservice.mappers.UserSignupDtoMapper;
 import com.ecommerce.usermanagementservice.models.User;
@@ -103,6 +107,45 @@ public class AutoControllerMvcTests {
                         .content(objectMapper.writeValueAsString(dto))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict())
+                .andExpect(content().string(objectMapper.writeValueAsString(errorDto)));
+    }
+
+    @Test
+    public void Test_Login_Success() throws Exception {
+        var dto = new UserLoginDto();
+        dto.setPassword("abcD#223fd3d");
+        dto.setEmail("avc@mockmail.com");
+        User userResponse = new User();
+        userResponse.setPassword(dto.getPassword());
+        userResponse.setName("name");
+        userResponse.setId(1L);
+        userResponse.setEmail(dto.getEmail());
+        AuthenticatedUser authUser = new AuthenticatedUser();
+        authUser.setToken("token");
+        authUser.setUser(userResponse);
+        when(authService.login(any(String.class), any(String.class))).thenReturn(authUser);
+
+        mockMvc.perform(post("/auth/login")
+                        .content(objectMapper.writeValueAsString(dto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(objectMapper.writeValueAsString(userDtoMapper.toDto(userResponse))))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.isA(String.class)))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString(AuthConstants.AUTH_COKIE_NAME)));
+    }
+
+    @Test
+    public void Test_Login_Failure() throws Exception {
+        var dto = new UserLoginDto();
+        dto.setPassword("abcD#223fd3d");
+        dto.setEmail("avc@mockmail.com");
+        when(authService.login(any(String.class), any(String.class))).thenThrow(new InvalidCredentialsException("Invalid cred"));
+        ErrorResponseDto errorDto = new ErrorResponseDto();
+        errorDto.setMessage("Invalid cred");
+        mockMvc.perform(post("/auth/login")
+                        .content(objectMapper.writeValueAsString(dto))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
                 .andExpect(content().string(objectMapper.writeValueAsString(errorDto)));
     }
 

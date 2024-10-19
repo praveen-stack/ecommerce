@@ -1,5 +1,6 @@
 package com.ecommerce.usermanagementservice.configuration;
 
+import com.ecommerce.usermanagementservice.Exceptions.InvalidCredentialsException;
 import com.ecommerce.usermanagementservice.Exceptions.UserExistsException;
 import com.ecommerce.usermanagementservice.dtos.ErrorResponseDto;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,13 @@ public class GlobalExceptionHandler {
         var message = new ErrorResponseDto();
         message.setMessage(ex.getMessage());
         return new ResponseEntity<ErrorResponseDto>(message, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidCreds(InvalidCredentialsException ex) {
+        var message = new ErrorResponseDto();
+        message.setMessage(ex.getMessage());
+        return new ResponseEntity<ErrorResponseDto>(message, HttpStatus.UNAUTHORIZED);
     }
 }
 
