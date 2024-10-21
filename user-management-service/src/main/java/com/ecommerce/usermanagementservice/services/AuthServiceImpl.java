@@ -41,7 +41,10 @@ public class AuthServiceImpl implements AuthService {
         }
         var user = new User();
         user.setEmail(inputUser.getEmail());
-        String hashedPassword = encodePassword(inputUser.getPassword());
+        String hashedPassword = null;
+        if (inputUser.getPassword() != null){
+            hashedPassword = encodePassword(inputUser.getPassword());
+        }
         user.setPassword(hashedPassword);
         user.setName(inputUser.getName());
         user.setState(UserState.ACTIVE);

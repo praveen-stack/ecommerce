@@ -3,7 +3,9 @@ package com.ecommerce.usermanagementservice.controllers;
 import com.ecommerce.usermanagementservice.Exceptions.InvalidCredentialsException;
 import com.ecommerce.usermanagementservice.Exceptions.UserExistsException;
 import com.ecommerce.usermanagementservice.components.AutherisationFilter;
+import com.ecommerce.usermanagementservice.components.OAuth2SuccessHandler;
 import com.ecommerce.usermanagementservice.configuration.AppConfig;
+import com.ecommerce.usermanagementservice.configuration.OAuth2Config;
 import com.ecommerce.usermanagementservice.configuration.SecurityConfig;
 import com.ecommerce.usermanagementservice.dtos.AuthenticatedUser;
 import com.ecommerce.usermanagementservice.dtos.ErrorResponseDto;
@@ -34,7 +36,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, UserSignupDtoMapper.class, UserDtoMapper.class, AutherisationFilter.class, AppConfig.class, AuthUtil.class})
+@Import({
+        SecurityConfig.class,
+        UserSignupDtoMapper.class,
+        UserDtoMapper.class,
+        AutherisationFilter.class,
+        AppConfig.class,
+        AuthUtil.class,
+        OAuth2SuccessHandler.class,
+        OAuth2Config.class
+})
 public class AutoControllerMvcTests {
 
     @Autowired

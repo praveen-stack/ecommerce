@@ -2,7 +2,9 @@ package com.ecommerce.usermanagementservice.controllers;
 
 
 import com.ecommerce.usermanagementservice.components.AutherisationFilter;
+import com.ecommerce.usermanagementservice.components.OAuth2SuccessHandler;
 import com.ecommerce.usermanagementservice.configuration.AppConfig;
+import com.ecommerce.usermanagementservice.configuration.OAuth2Config;
 import com.ecommerce.usermanagementservice.configuration.SecurityConfig;
 import com.ecommerce.usermanagementservice.dtos.AuthorizedUser;
 import com.ecommerce.usermanagementservice.dtos.UserProfileUpdateDto;
@@ -44,7 +46,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         AutherisationFilter.class,
         AppConfig.class,
         AuthUtil.class,
-        UserProfileUpdateDtoMapper.class
+        UserProfileUpdateDtoMapper.class,
+        OAuth2SuccessHandler.class,
+        OAuth2Config.class
 })
 public class UserProfileMvcTests {
 
