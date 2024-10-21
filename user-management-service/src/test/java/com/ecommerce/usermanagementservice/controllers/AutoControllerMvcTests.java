@@ -2,16 +2,21 @@ package com.ecommerce.usermanagementservice.controllers;
 
 import com.ecommerce.usermanagementservice.Exceptions.InvalidCredentialsException;
 import com.ecommerce.usermanagementservice.Exceptions.UserExistsException;
+import com.ecommerce.usermanagementservice.components.AutherisationFilter;
+import com.ecommerce.usermanagementservice.configuration.AppConfig;
 import com.ecommerce.usermanagementservice.configuration.SecurityConfig;
 import com.ecommerce.usermanagementservice.dtos.AuthenticatedUser;
 import com.ecommerce.usermanagementservice.dtos.ErrorResponseDto;
 import com.ecommerce.usermanagementservice.dtos.UserLoginDto;
 import com.ecommerce.usermanagementservice.dtos.UserSignupDto;
 import com.ecommerce.usermanagementservice.enums.AuthConstants;
+import com.ecommerce.usermanagementservice.mappers.UserAuthrizedDtoMapper;
 import com.ecommerce.usermanagementservice.mappers.UserDtoMapper;
 import com.ecommerce.usermanagementservice.mappers.UserSignupDtoMapper;
 import com.ecommerce.usermanagementservice.models.User;
 import com.ecommerce.usermanagementservice.services.AuthService;
+import com.ecommerce.usermanagementservice.services.UserServiceImpl;
+import com.ecommerce.usermanagementservice.utils.AuthUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
@@ -29,7 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, ModelMapper.class, UserSignupDtoMapper.class, UserDtoMapper.class})
+@Import({SecurityConfig.class, UserSignupDtoMapper.class, UserDtoMapper.class, AutherisationFilter.class, AppConfig.class, AuthUtil.class})
 public class AutoControllerMvcTests {
 
     @Autowired
@@ -43,6 +48,12 @@ public class AutoControllerMvcTests {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private UserServiceImpl userService;
+
+    @MockBean
+    private UserAuthrizedDtoMapper userAuthrizedDtoMapper;
 
     @Test
     public void Test_Signup_Validations() throws Exception {

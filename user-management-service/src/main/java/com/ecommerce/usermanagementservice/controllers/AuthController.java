@@ -9,6 +9,7 @@ import com.ecommerce.usermanagementservice.enums.AuthConstants;
 import com.ecommerce.usermanagementservice.mappers.UserDtoMapper;
 import com.ecommerce.usermanagementservice.mappers.UserSignupDtoMapper;
 import com.ecommerce.usermanagementservice.services.AuthService;
+import com.ecommerce.usermanagementservice.utils.AuthUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +33,9 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private AuthUtil authUtil;
+
     @PostMapping("/signup")
     public UserDto signup(@Valid @RequestBody UserSignupDto dto) throws UserExistsException {
         var userInput = userSignupDtoMapper.toEntity(dto);
@@ -40,21 +44,12 @@ public class AuthController {
         return userDto;
     }
 
-    private ResponseCookie createLoginCookie(String token){
-        return ResponseCookie.from(AuthConstants.AUTH_COKIE_NAME, token)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(24 * 60 * 60) // 1 day in seconds
-                .build();
-    }
-
     @PostMapping("/login")
     public ResponseEntity<UserDto> login(@Valid @RequestBody UserLoginDto dto) throws InvalidCredentialsException {
         var authenticatedUser = this.authService.login(dto.getEmail(), dto.getPassword());
         var userDto = this.userDtoMapper.toDto(authenticatedUser.getUser());
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add(HttpHeaders.SET_COOKIE, createLoginCookie(authenticatedUser.getToken()).toString());
+        headers.add(HttpHeaders.SET_COOKIE, authUtil.createLoginCookie(authenticatedUser.getToken()).toString());
         var responseEntity = new ResponseEntity<UserDto>(userDto, headers, HttpStatus.OK);
         return responseEntity;
     }
