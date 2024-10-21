@@ -11,4 +11,6 @@ public interface AuthService {
     User signup(User user) throws UserExistsException;
     AuthenticatedUser login(String email, String password) throws InvalidCredentialsException;
     User resetPassword(AuthorizedUser user, String newPassword);
+    User resetPassword(String resetToken, String newPassword);
+    void generatePasswordResetToken(String email);
 }
