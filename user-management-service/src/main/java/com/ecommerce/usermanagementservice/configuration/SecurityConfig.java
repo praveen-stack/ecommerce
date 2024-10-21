@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -22,6 +23,9 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Autowired
+    private AuthenticationSuccessHandler oAuth2SuccessHandler;
+
     @Bean
     public SecurityFilterChain getSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors().disable();
@@ -30,8 +34,8 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/auth/**", "/auth/signup").permitAll()
                 .anyRequest().authenticated());
+        httpSecurity.oauth2Login().successHandler(oAuth2SuccessHandler);
         httpSecurity.addFilterBefore(autherisationFilter, UsernamePasswordAuthenticationFilter.class);
         return httpSecurity.build();
     }
-
 }
