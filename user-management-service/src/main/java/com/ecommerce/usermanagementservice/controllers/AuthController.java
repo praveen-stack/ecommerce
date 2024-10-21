@@ -2,10 +2,7 @@ package com.ecommerce.usermanagementservice.controllers;
 
 import com.ecommerce.usermanagementservice.Exceptions.InvalidCredentialsException;
 import com.ecommerce.usermanagementservice.Exceptions.UserExistsException;
-import com.ecommerce.usermanagementservice.dtos.UserDto;
-import com.ecommerce.usermanagementservice.dtos.UserLoginDto;
-import com.ecommerce.usermanagementservice.dtos.UserSignupDto;
-import com.ecommerce.usermanagementservice.enums.AuthConstants;
+import com.ecommerce.usermanagementservice.dtos.*;
 import com.ecommerce.usermanagementservice.mappers.UserDtoMapper;
 import com.ecommerce.usermanagementservice.mappers.UserSignupDtoMapper;
 import com.ecommerce.usermanagementservice.services.AuthService;
@@ -14,7 +11,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -52,5 +48,17 @@ public class AuthController {
         headers.add(HttpHeaders.SET_COOKIE, authUtil.createLoginCookie(authenticatedUser.getToken()).toString());
         var responseEntity = new ResponseEntity<UserDto>(userDto, headers, HttpStatus.OK);
         return responseEntity;
+    }
+
+    @PostMapping("/reset-password-token")
+    public ResponseEntity<Void> requestResetPasswordToken(@RequestBody @Valid ResetPasswordRequest resetPasswordRequest) {
+        this.authService.generatePasswordResetToken(resetPasswordRequest.getEmail());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody @Valid ResetPasswordUsingToken passwordResetRequest) {
+        this.authService.resetPassword(passwordResetRequest.getToken(), passwordResetRequest.getPassword());
+        return ResponseEntity.noContent().build();
     }
 }

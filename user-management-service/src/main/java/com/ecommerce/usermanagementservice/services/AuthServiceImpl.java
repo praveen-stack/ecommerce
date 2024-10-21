@@ -1,26 +1,22 @@
 package com.ecommerce.usermanagementservice.services;
 
 import com.ecommerce.usermanagementservice.Exceptions.InvalidCredentialsException;
+import com.ecommerce.usermanagementservice.Exceptions.UnauthorizedException;
 import com.ecommerce.usermanagementservice.Exceptions.UserExistsException;
 import com.ecommerce.usermanagementservice.dtos.AuthenticatedUser;
 import com.ecommerce.usermanagementservice.dtos.AuthorizedUser;
 import com.ecommerce.usermanagementservice.enums.MessageText;
 import com.ecommerce.usermanagementservice.enums.UserState;
+import com.ecommerce.usermanagementservice.models.PasswordResetToken;
 import com.ecommerce.usermanagementservice.models.User;
+import com.ecommerce.usermanagementservice.repositories.PasswordResetTokenRepository;
 import com.ecommerce.usermanagementservice.repositories.UserRepository;
 import com.ecommerce.usermanagementservice.utils.AuthUtil;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.crypto.SecretKey;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -29,6 +25,8 @@ public class AuthServiceImpl implements AuthService {
     private BCryptPasswordEncoder passwordEncoder;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
     @Autowired
     private AuthUtil authUtil;
@@ -74,14 +72,51 @@ public class AuthServiceImpl implements AuthService {
         return authenticatedUser;
     }
 
+    private User resetPassword(String newPassword, User user) {
+        var encodedPass = this.encodePassword(newPassword);
+        user.setPassword(encodedPass);
+        this.userRepository.save(user);
+        return user;
+    }
+
     @Override
     @Transactional
     public User resetPassword(AuthorizedUser user, String newPassword) {
         var userId = user.getId();
         var userToUpdate = userRepository.findById(userId).get();
-        var encodedPass = this.encodePassword(newPassword);
-        userToUpdate.setPassword(encodedPass);
-        this.userRepository.save(userToUpdate);
-        return userToUpdate;
+        return resetPassword(newPassword, userToUpdate);
+    }
+
+    @Override
+    @Transactional
+    public User resetPassword(String resetToken, String newPassword) {
+        var token = passwordResetTokenRepository.findByToken(resetToken);
+        if(token == null ||  token.getExpiryDate().before(new Date())){
+            throw new UnauthorizedException("Invalid reset token");
+        }
+        var user = token.getUser();
+        user = this.resetPassword(newPassword, user);
+        passwordResetTokenRepository.delete(token);
+        return user;
+    }
+
+    @Transactional
+    public void generatePasswordResetToken(String email) {
+        var userOptional = this.userRepository.findByEmail(email);
+        if(!userOptional.isPresent()){
+            throw new UnauthorizedException("Invalid account");
+        }
+        var user = userOptional.get();
+        PasswordResetToken tokenObj = this.passwordResetTokenRepository.findByUserId(user.getId());
+        if(tokenObj == null){
+            tokenObj = new PasswordResetToken();
+        }
+        var token = UUID.randomUUID().toString();
+        // expire after 1 hour
+        var expiryDate = new Date(System.currentTimeMillis() + 3600000);
+        tokenObj.setToken(token);
+        tokenObj.setExpiryDate(expiryDate);
+        tokenObj.setUser(user);
+        passwordResetTokenRepository.save(tokenObj);
     }
 }
