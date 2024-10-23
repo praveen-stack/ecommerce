@@ -21,6 +21,7 @@ public class Product extends BaseModel {
 
     private String title;
     private Double price;
+    @Column(columnDefinition = "TEXT")
     private String description;
     @ManyToOne(targetEntity = Category.class)
     private Category category;
