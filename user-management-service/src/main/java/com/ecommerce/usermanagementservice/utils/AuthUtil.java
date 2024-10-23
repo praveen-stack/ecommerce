@@ -14,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,11 +58,8 @@ public class AuthUtil {
         claims.put("name", user.getName());
         claims.put("email", user.getEmail());
         var currentTimeInMillis = System.currentTimeMillis();
-        // 24 hour expiry
-        var expiryInMillis = currentTimeInMillis + 24 * 60 * 60 * 1000;
-        claims.put("exp", Long.toString(expiryInMillis));
-        claims.put("iat", Long.toString(currentTimeInMillis));
-        return Jwts.builder().claims(claims).signWith(secretKey, SignatureAlgorithm.HS256).compact();
+        long expMillis = currentTimeInMillis + 3600000 * 24;
+        return Jwts.builder().issuedAt(new Date()).expiration(new Date(expMillis)).claims(claims).signWith(secretKey, SignatureAlgorithm.HS256).compact();
     }
 
     public ResponseCookie createLoginCookie(String token) {
