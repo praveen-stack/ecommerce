@@ -5,10 +5,15 @@ import com.ecommerce.prodcatalogservice.dtos.CreateProductDto;
 import com.ecommerce.prodcatalogservice.dtos.ProductDto;
 import com.ecommerce.prodcatalogservice.models.Category;
 import com.ecommerce.prodcatalogservice.models.Product;
+import com.ecommerce.prodcatalogservice.services.ProductDocumentService;
 import com.ecommerce.prodcatalogservice.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/products")
@@ -16,6 +21,9 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private ProductDocumentService productDocumentService;
 
     private ProductDto convertToDto(Product product){
         ProductDto dto = new ProductDto();
@@ -43,6 +51,12 @@ public class ProductController {
         return product;
     }
 
+    @GetMapping("/suggestions")
+    public List<String> getProductSuggestions(@RequestParam(required = true) String titleSearchKey,
+                                              @RequestParam(defaultValue = "10") Integer pageSize) {
+        return productDocumentService.getProductSearchSuggestions(titleSearchKey, pageSize);
+    }
+
     @GetMapping("/{id}")
     public ProductDto getProduct(@PathVariable Long id) {
         var product = productService.getProduct(id);
@@ -54,5 +68,18 @@ public class ProductController {
         product = productService.createProduct(product);
         return convertToDto(product);
     }
+    @PostMapping("/bulk")
+    public List<ProductDto> bulkInsertProducts(@RequestBody List<CreateProductDto> productDtos) {
+        List<Product> products = productDtos.stream()
+                .map(this::convertToEntity)
+                .collect(Collectors.toList());
 
+        List<Product> createdProducts = new ArrayList<>();
+        for(Product product: products){
+            createdProducts.add(productService.createProduct(product));
+        }
+        return createdProducts.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 }
