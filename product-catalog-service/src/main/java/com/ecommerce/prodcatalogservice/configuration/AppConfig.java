@@ -1,4 +1,4 @@
-package com.ecommerce.usermanagementservice.configuration;
+package com.ecommerce.prodcatalogservice.configuration;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
