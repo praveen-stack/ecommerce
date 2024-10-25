@@ -9,7 +9,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Data
 @Document(indexName = "products")
 public class ProductDocument {
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Long)
     private Long id;
     @Field(type = FieldType.Text)
     private String title;

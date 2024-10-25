@@ -3,12 +3,15 @@ package com.ecommerce.prodcatalogservice.controllers;
 import com.ecommerce.prodcatalogservice.dtos.CategoryDto;
 import com.ecommerce.prodcatalogservice.dtos.CreateProductDto;
 import com.ecommerce.prodcatalogservice.dtos.ProductDto;
+import com.ecommerce.prodcatalogservice.dtos.ProductSearchDto;
 import com.ecommerce.prodcatalogservice.models.Category;
 import com.ecommerce.prodcatalogservice.models.Product;
 import com.ecommerce.prodcatalogservice.services.ProductDocumentService;
 import com.ecommerce.prodcatalogservice.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -16,6 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@Validated
 @RequestMapping("/products")
 public class ProductController {
 
@@ -62,8 +66,15 @@ public class ProductController {
         var product = productService.getProduct(id);
         return convertToDto(product);
     }
+
+    @GetMapping
+    public Page<ProductDto> getProducts(@Valid @ModelAttribute ProductSearchDto dto) {
+        var page = productService.getProducts(dto);
+        return page.map(this::convertToDto);
+    }
+
     @PostMapping
-    public ProductDto createProduct(@RequestBody @Valid CreateProductDto productDto) {
+    public ProductDto createProduct(@Valid @RequestBody CreateProductDto productDto) {
         var product = convertToEntity(productDto);
         product = productService.createProduct(product);
         return convertToDto(product);
