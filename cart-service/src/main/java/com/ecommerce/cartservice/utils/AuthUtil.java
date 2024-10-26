@@ -1,6 +1,6 @@
-package com.ecommerce.prodcatalogservice.utils;
+package com.ecommerce.cartservice.utils;
 
-import com.ecommerce.prodcatalogservice.enums.AuthConstants;
+import com.ecommerce.cartservice.enums.AuthConstants;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseCookie;
