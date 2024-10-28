@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/me")
@@ -54,16 +55,21 @@ public class UserProfileController {
         return userDtoMapper.toDto(user);
     }
 
+    @DeleteMapping("/addresses/{id}")
+    public void deleteAddress(Authentication authentication, @PathVariable Long id) {
+        AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
+        userService.deleteAddress(authUser, id);
+    }
+    @GetMapping("/addresses")
+    public List<AddressDto> getAddresses(Authentication authentication) {
+        AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
+        List<Address> addresses = userService.getAddresses(authUser);
+        return addresses.stream().map(addressDtoMapper::toDto).toList();
+    }
     @PutMapping("/addresses")
     public AddressDto updateAddress(Authentication authentication, @RequestBody @Valid AddressDto dto) {
         AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
         Address address = userService.updateAddress(authUser, addressDtoMapper.toEntity(dto));
         return addressDtoMapper.toDto(address);
-    }
-
-    @DeleteMapping("/addresses/:id")
-    public void deleteAddress(Authentication authentication, @RequestParam Long id) {
-        AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
-        userService.deleteAddress(authUser, id);
     }
 }
