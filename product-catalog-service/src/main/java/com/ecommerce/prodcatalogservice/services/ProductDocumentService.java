@@ -10,5 +10,5 @@ public interface ProductDocumentService {
     void indexProduct(ProductDocument product);
     List<String> getProductSearchSuggestions(String titleSearchKey, Integer pageSize);
 
-    SearchPage<ProductDocument> searchProducts(Long categoryId, String keyword, Pageable pageable);
+    SearchPage<ProductDocument> searchProducts(Long categoryId, List<Long> productIds, String keyword, Pageable pageable);
 }

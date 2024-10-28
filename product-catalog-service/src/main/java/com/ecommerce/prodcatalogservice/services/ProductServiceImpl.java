@@ -64,7 +64,7 @@ public class ProductServiceImpl implements ProductService {
     public Page<Product> getProducts(ProductSearchDto dto) {
         Sort sort = Sort.by(Sort.Direction.fromString(dto.getSortOrder()), dto.getSortBy());
         Pageable pageable = PageRequest.of(dto.getPageNumber(), dto.getPageSize(), sort);
-        SearchPage<ProductDocument> searchPage = productDocumentService.searchProducts(dto.getCategoryId(), dto.getQuery(), pageable);
+        SearchPage<ProductDocument> searchPage = productDocumentService.searchProducts(dto.getCategoryId(), dto.getProductIds(), dto.getQuery(), pageable);
         List<Product> products = new ArrayList<>();
         if (!searchPage.getContent().isEmpty()) {
             products = this.productRepository.findAllById(searchPage.getContent().stream().map(p -> p.getContent().getId()).toList());

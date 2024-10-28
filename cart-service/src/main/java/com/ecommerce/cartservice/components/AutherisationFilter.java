@@ -66,6 +66,7 @@ public class AutherisationFilter extends OncePerRequestFilter {
                 userAuthrizedDto.setId(Long.parseLong(userID));
                 userAuthrizedDto.setName(name);
                 userAuthrizedDto.setEmail(email);
+                userAuthrizedDto.setJwt(jwt);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userAuthrizedDto, null, null);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
