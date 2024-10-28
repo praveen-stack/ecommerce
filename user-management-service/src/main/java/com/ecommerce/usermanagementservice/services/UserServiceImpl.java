@@ -3,7 +3,9 @@ package com.ecommerce.usermanagementservice.services;
 import com.ecommerce.usermanagementservice.Exceptions.UserExistsException;
 import com.ecommerce.usermanagementservice.dtos.AuthorizedUser;
 import com.ecommerce.usermanagementservice.enums.UserState;
+import com.ecommerce.usermanagementservice.models.Address;
 import com.ecommerce.usermanagementservice.models.User;
+import com.ecommerce.usermanagementservice.repositories.AddressRepository;
 import com.ecommerce.usermanagementservice.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
 
     @Override
     public User getUserByEmail(String email) {
@@ -39,7 +44,9 @@ public class UserServiceImpl implements UserService {
         }
         userToUpdate.setEmail(userInput.getEmail());
         userToUpdate.setName(userInput.getName());
-        return this.userRepository.save(userToUpdate);
+        userToUpdate = this.userRepository.save(userToUpdate);
+        userToUpdate.getAddresses();
+        return userToUpdate;
     }
 
     @Override
@@ -52,6 +59,22 @@ public class UserServiceImpl implements UserService {
         if(user.get().getState()!= UserState.ACTIVE){
             return null;
         }
+        // fetch address lazy
+        user.get().getAddresses();
         return user.get();
+    }
+
+    @Override
+    @Transactional
+    public Address updateAddress(AuthorizedUser authUser, Address address) {
+        var user = this.getValidUserById(authUser.getId());
+        address.setUser(user);
+        address = this.addressRepository.save(address);
+        return address;
+    }
+
+    @Override
+    public void deleteAddress(AuthorizedUser user, Long addressId) {
+        this.addressRepository.deleteByIdAndUserId(addressId, user.getId());
     }
 }
