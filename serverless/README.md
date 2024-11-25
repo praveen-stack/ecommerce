@@ -13,9 +13,9 @@ This project contains the serverless code for the ecommerce project
 
 # Deploying the apis and lambda functions
 
-1. Source the environment vars
+1. Source the environment vars. Sample file in bin/sample.sh
 ```
-source dev.sh
+source ./bin/dev.sh
 ```
 
 2. Build the source to generate the jar
@@ -24,6 +24,10 @@ source dev.sh
 maven package
 ```
 
-3. 
+3. To deploy to a specific stage 'dev' use command below. Change stage as per need.
+
+```
+sls deploy --stage dev
+```
 
 
