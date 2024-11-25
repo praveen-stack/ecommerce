@@ -1,6 +1,5 @@
 *.class
 target
-/bin/
 /.settings/
 .project
 .classpath
@@ -12,3 +11,6 @@ target
 
 # Serverless directories
 .serverless
+
+bin
+!bin/sample.sh

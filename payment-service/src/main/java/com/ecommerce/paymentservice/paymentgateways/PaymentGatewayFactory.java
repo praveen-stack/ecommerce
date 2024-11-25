@@ -1,20 +1,17 @@
 package com.ecommerce.paymentservice.paymentgateways;
 
-import com.stripe.Stripe;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PaymentGatewayFactory {
 
-    @Autowired
-    private RazorPayPaymentGateway razorPayPaymentGateway;
 
     @Autowired
-    private StripePaymentGateway stripePaymentGateway;
+    private CashFreeGateway cashFreeGateway;
 
     public PaymentGateway getPaymentGateway() {
         // randomize selection of payment gateway
-        return stripePaymentGateway;
+        return cashFreeGateway;
     }
 }

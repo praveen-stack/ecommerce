@@ -14,15 +14,15 @@ package:
 
 functions:
   payu-payments:
-    handler: com.serverless.handlers.PayUWebhookHandler
-#    The following are a few example events you can configure
-#    NOTE: Please make sure to change your handler code to work with those events
-#    Check the event documentation for details
+    handler: com.serverless.handlers.CashfreeUWebhookHandler
+
     events:
       - httpApi:
-          path: /payu/payments
+          path: /cashfree/payments
           method: post
 
-#    Define function environment variables here
-#    environment:
-#      variable2: value2
+    environment:
+      KAFKA_REST_URL: ${env:KAFKA_REST_URL}
+      KAFKA_USERNAME: ${env:KAFKA_USERNAME}
+      KAFKA_PASSWORD: ${env:KAFKA_PASSWORD}
+      CASHFREE_WEBHOOK_KAFKA_TOPIC_NAME: ${env:CASHFREE_WEBHOOK_KAFKA_TOPIC_NAME}

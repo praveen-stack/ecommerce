@@ -18,7 +18,7 @@ public class RazorPayPaymentGateway implements PaymentGateway {
     private RazorpayClient razorpayClient;
 
     @Override
-    public PaymentLink createPaymentLink(Long orderId, Long userId, Double amount) {
+    public PaymentLink createPaymentLink(Long orderId, Long userId, Double amount) throws PaymentGatewayException{
         try {
             JSONObject request = new JSONObject();
             request.put("amount", amount * 100);

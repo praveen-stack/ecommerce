@@ -1,4 +1,4 @@
-package com.serverless;
+package com.serverless.dto;
 
 import java.util.Map;
 
