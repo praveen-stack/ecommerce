@@ -2,12 +2,16 @@ package com.ecommerce.paymentservice.services;
 
 import com.ecommerce.paymentservice.dtos.AuthorizedUser;
 import com.ecommerce.paymentservice.dtos.PaymentLink;
+import com.ecommerce.paymentservice.enums.KafkaTopics;
 import com.ecommerce.paymentservice.enums.PaymentStatus;
 import com.ecommerce.paymentservice.exceptions.NotFoundException;
 import com.ecommerce.paymentservice.models.Payment;
 import com.ecommerce.paymentservice.paymentgateways.PaymentGatewayFactory;
 import com.ecommerce.paymentservice.repositories.PaymentRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +23,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     private PaymentGatewayFactory paymentGatewayFactory;
+
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     private Payment getActivePayment(Long orderId) {
         return paymentRepository.findByOrderIdAndStatus(orderId, PaymentStatus.PENDING);
@@ -49,6 +56,22 @@ public class PaymentServiceImpl implements PaymentService {
         if (payment == null) {
             throw new NotFoundException("Payment not found");
         }
+        return payment;
+    }
+
+    private void sendPaymentUpdateEvent(Payment payment) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String message = objectMapper.writeValueAsString(payment);
+        kafkaTemplate.send(KafkaTopics.PAYMENT_UPDATE, message);
+    }
+
+    @Override
+    @Transactional
+    public Payment updatePaymentStatus(String gatewayPaymentId, PaymentStatus status) throws JsonProcessingException {
+        var payment = paymentRepository.findByGatewayPaymentId(gatewayPaymentId).orElseThrow(() -> new NotFoundException("Payment not found"));
+        payment.setStatus(status);
+        payment = paymentRepository.save(payment);
+        this.sendPaymentUpdateEvent(payment);
         return payment;
     }
 }

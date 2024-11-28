@@ -1,8 +1,6 @@
 package com.ecommerce.cartservice.services;
 
-import com.ecommerce.cartservice.components.ObjectMapper;
 import com.ecommerce.cartservice.dtos.AuthorizedUser;
-import com.ecommerce.cartservice.dtos.CartCache;
 import com.ecommerce.cartservice.dtos.Product;
 import com.ecommerce.cartservice.models.Cart;
 import com.ecommerce.cartservice.models.Item;
