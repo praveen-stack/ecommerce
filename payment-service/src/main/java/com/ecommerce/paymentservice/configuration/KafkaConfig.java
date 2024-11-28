@@ -35,21 +35,28 @@ public class KafkaConfig {
     @Value("${ssl.truststore.password}")
     private String sslTruststorePassword;
 
-    private Map<String, Object> consumerConfigs() {
-        Map<String, Object> props = new HashMap<>();
+
+
+    private void addDefaultProps(Map<String, Object> props) {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(SaslConfigs.SASL_JAAS_CONFIG, saslJaasConfig);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put("security.protocol", "SASL_SSL");
         props.put(SaslConfigs.SASL_MECHANISM, "SCRAM-SHA-256");
         props.put("ssl.truststore.location", sslTruststoreLocation);
         props.put("ssl.truststore.password", sslTruststorePassword);
         props.put("ssl.endpoint.identification.algorithm", "");
         props.put("ssl.truststore.type", "jks");
+    }
+    private Map<String, Object> consumerConfigs() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        addDefaultProps(props);
         return props;
     }
+
+
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
@@ -59,9 +66,9 @@ public class KafkaConfig {
 
     private Map<String, Object> getProducerConfigs() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        addDefaultProps(props);
         return props;
     }
 

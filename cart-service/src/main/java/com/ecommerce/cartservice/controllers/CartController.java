@@ -61,4 +61,20 @@ public class CartController {
         }
         return convertToDto(cart);
     }
+
+    @PostMapping("/checkout")
+    public CheckoutDto addToCart(Authentication authentication, @Valid @RequestBody CheckoutRequest checkoutRequest) {
+        AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
+        Cart cart;
+        if(cartRequest.getQuantity() > 0){
+            cart = cartService.addToCart(authUser, cartRequest.getProductId(), cartRequest.getQuantity());
+        }
+        else {
+            // if negative or 0 remove from cart
+            cart = cartService.removeFromCart(authUser, cartRequest.getProductId(), Optional.of(cartRequest.getQuantity() * -1));
+        }
+        return convertToDto(cart);
+    }
+
+
 }

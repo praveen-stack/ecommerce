@@ -3,6 +3,7 @@ package com.ecommerce.paymentservice.services;
 import com.ecommerce.paymentservice.dtos.AuthorizedUser;
 import com.ecommerce.paymentservice.dtos.PaymentLink;
 import com.ecommerce.paymentservice.enums.KafkaTopics;
+import com.ecommerce.paymentservice.enums.PaymentMethod;
 import com.ecommerce.paymentservice.enums.PaymentStatus;
 import com.ecommerce.paymentservice.exceptions.NotFoundException;
 import com.ecommerce.paymentservice.models.Payment;
@@ -10,6 +11,7 @@ import com.ecommerce.paymentservice.paymentgateways.PaymentGatewayFactory;
 import com.ecommerce.paymentservice.repositories.PaymentRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -33,14 +35,15 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public Payment createPayment(AuthorizedUser user, Long orderId, Double amount) {
+    public Payment createPayment(AuthorizedUser user, Long orderId, Double amount, PaymentMethod paymentMethod) {
         var payment = getActivePayment(orderId);
         if (payment != null) {
             return payment;
         }
         var paymentGateway = paymentGatewayFactory.getPaymentGateway();
-        PaymentLink link = paymentGateway.createPaymentLink(orderId, user.getId(), amount);
+        PaymentLink link = paymentGateway.createPaymentLink(orderId, user, amount, paymentMethod);
         payment = new Payment();
+        payment.setPaymentMethod(paymentMethod);
         payment.setGatewayPaymentId(link.getId());
         payment.setPaymentLink(link.getLink());
         payment.setOrderId(orderId);
@@ -61,6 +64,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private void sendPaymentUpdateEvent(Payment payment) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         String message = objectMapper.writeValueAsString(payment);
         kafkaTemplate.send(KafkaTopics.PAYMENT_UPDATE, message);
     }
