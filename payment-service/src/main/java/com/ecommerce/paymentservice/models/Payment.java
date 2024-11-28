@@ -1,6 +1,7 @@
 package com.ecommerce.paymentservice.models;
 
 import com.ecommerce.paymentservice.enums.Gateway;
+import com.ecommerce.paymentservice.enums.PaymentMethod;
 import com.ecommerce.paymentservice.enums.PaymentStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,7 +27,8 @@ public class Payment extends BaseModel {
     private Gateway gateway;
     @Column(nullable = false)
     private String gatewayPaymentId;
-
+    @Column(nullable = true)
+    PaymentMethod paymentMethod;
     @Column(length = 2048)
     private String paymentLink;
 

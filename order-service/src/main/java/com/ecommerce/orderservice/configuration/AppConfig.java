@@ -26,6 +26,18 @@ public class AppConfig {
     @Autowired
     private Environment environment;
 
+    public String getProductCatalogServiceEndpoint() {
+        return environment.getProperty("product.catalog.service.endpoint");
+    }
+
+    public String getPaymentServiceEndpoint() {
+        return environment.getProperty("payment.service.endpoint");
+    }
+
+    public String getUserServiceEndpoint() {
+        return environment.getProperty("user.service.endpoint");
+    }
+
     @Bean
     public SecretKey getSecretKey(){
         MacAlgorithm algorithm = Jwts.SIG.HS256;

@@ -45,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
         }
         user.setPassword(hashedPassword);
         user.setName(inputUser.getName());
+        user.setPhoneNumber(inputUser.getPhoneNumber());
         user.setState(UserState.ACTIVE);
         userRepository.save(user);
         return user;

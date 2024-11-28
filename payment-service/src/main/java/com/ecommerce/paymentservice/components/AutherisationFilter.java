@@ -54,11 +54,13 @@ public class AutherisationFilter extends OncePerRequestFilter {
                 String userID = null;
                 String email = null;
                 String name = null;
+                String phoneNumber = null;
                 try {
                     Claims claims = getClaims(jwt);
                     userID = claims.getSubject();
                     email = claims.get("email", String.class);
                     name = claims.get("name", String.class);
+                    phoneNumber = claims.get("phoneNumber", String.class);
                 } catch (Exception e) {
                     throw new UnauthorizedException("Unauthorized");
                 }
@@ -66,6 +68,7 @@ public class AutherisationFilter extends OncePerRequestFilter {
                 userAuthrizedDto.setId(Long.parseLong(userID));
                 userAuthrizedDto.setName(name);
                 userAuthrizedDto.setEmail(email);
+                userAuthrizedDto.setPhoneNumber(phoneNumber);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userAuthrizedDto, null, null);
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

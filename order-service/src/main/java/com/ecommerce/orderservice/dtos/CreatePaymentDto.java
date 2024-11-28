@@ -1,6 +1,6 @@
-package com.ecommerce.paymentservice.dtos;
+package com.ecommerce.orderservice.dtos;
 
-import com.ecommerce.paymentservice.enums.PaymentMethod;
+import com.ecommerce.orderservice.enums.PaymentMethod;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 

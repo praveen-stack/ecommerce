@@ -17,6 +17,7 @@ import java.util.List;
 @Table(name = "\"user\"")
 public class User extends BaseModel{
     private String email;
+    private String phoneNumber;
     private String name;
     private String password;
 

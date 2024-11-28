@@ -14,4 +14,8 @@ public class UserProfileUpdateDto {
     @NotBlank()
     @Size(min = 1)
     private String name;
+
+    @NotBlank()
+    @Size(min = 10)
+    private String phoneNumber;
 }

@@ -1,8 +1,6 @@
 package com.ecommerce.orderservice.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -39,6 +37,10 @@ public class OrderItem extends BaseModel {
 
     @Column(columnDefinition = "TEXT", nullable = true)
     private String productDescription;
+
+    @ManyToOne()
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

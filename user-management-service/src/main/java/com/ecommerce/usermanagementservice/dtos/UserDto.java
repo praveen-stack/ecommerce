@@ -11,6 +11,7 @@ public class UserDto {
 
     private Long id;
     private String email;
+    private String phoneNumber;
     private String name;
     private Instant createdAt;
     private Instant updatedAt;

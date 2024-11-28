@@ -24,7 +24,7 @@ public class PaymentController {
      @PostMapping
      public PaymentDto createPayment(Authentication authentication, @RequestBody @Valid CreatePaymentDto createPaymentDto) {
          AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
-         Payment payment = paymentService.createPayment(authUser, createPaymentDto.getOrderId(), createPaymentDto.getAmount());
+         Payment payment = paymentService.createPayment(authUser, createPaymentDto.getOrderId(), createPaymentDto.getAmount(), createPaymentDto.getPaymentMethod());
          return paymentMapper.toDto(payment);
      }
 

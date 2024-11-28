@@ -57,6 +57,7 @@ public class AuthUtil {
         claims.put("sub", user.getId().toString());
         claims.put("name", user.getName());
         claims.put("email", user.getEmail());
+        claims.put("phoneNumber", user.getPhoneNumber());
         var currentTimeInMillis = System.currentTimeMillis();
         long expMillis = currentTimeInMillis + 3600000 * 24;
         return Jwts.builder().issuedAt(new Date()).expiration(new Date(expMillis)).claims(claims).signWith(secretKey, SignatureAlgorithm.HS256).compact();
