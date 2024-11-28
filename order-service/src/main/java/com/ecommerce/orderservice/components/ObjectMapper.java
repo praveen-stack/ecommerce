@@ -1,4 +1,4 @@
-package com.ecommerce.paymentservice.components;
+package com.ecommerce.orderservice.components;
 
 
 import org.modelmapper.ModelMapper;
