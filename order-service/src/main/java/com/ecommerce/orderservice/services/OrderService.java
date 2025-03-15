@@ -7,4 +7,6 @@ import com.ecommerce.orderservice.models.Order;
 public interface OrderService {
 
     Order createOrder(AuthorizedUser user, Order order, Long billingAddressId, Long ShippingAddressId, PaymentMethod paymentMethod);
+
+    Order getOrder(AuthorizedUser user, Long orderId);
 }

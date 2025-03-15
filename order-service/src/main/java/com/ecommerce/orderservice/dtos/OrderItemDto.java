@@ -5,7 +5,6 @@ import java.io.Serializable;
 
 @Data
 public class OrderItemDto implements Serializable {
-    private Long orderId;
     private Long productId;
     private Integer quantity;
     private Double price;

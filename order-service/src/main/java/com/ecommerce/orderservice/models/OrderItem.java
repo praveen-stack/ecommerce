@@ -15,9 +15,6 @@ import java.time.Instant;
 public class OrderItem extends BaseModel {
 
     @Column(nullable = false)
-    private Long orderId;
-
-    @Column(nullable = false)
     private Long productId;
 
     @Column(nullable = false)
