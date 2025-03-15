@@ -7,6 +7,7 @@ import com.ecommerce.orderservice.dtos.Payment;
 import com.ecommerce.orderservice.dtos.Product;
 import com.ecommerce.orderservice.enums.OrderStatus;
 import com.ecommerce.orderservice.enums.PaymentMethod;
+import com.ecommerce.orderservice.exceptions.NotFoundException;
 import com.ecommerce.orderservice.models.Address;
 import com.ecommerce.orderservice.models.Order;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,4 +71,19 @@ public class OrderServiceImpl implements OrderService{
         orderRepository.save(order);
         return order;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Order getOrder(AuthorizedUser user, Long orderId) {
+        var orderOptional = orderRepository.findById(orderId);
+        if(orderOptional.isEmpty()){
+            throw new NotFoundException("Order not found");
+        }
+        var order = orderOptional.get();
+        if(!order.getUserId().equals(user.getId())){
+            throw new NotFoundException("Order not found");
+        }
+        return order;
+    }
+
 }

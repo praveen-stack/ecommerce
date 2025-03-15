@@ -38,7 +38,7 @@ public class Order extends BaseModel {
     @Column(columnDefinition = "json", nullable = false)
     private Address billingAddress;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<OrderItem> items;
 
     @CreatedDate
