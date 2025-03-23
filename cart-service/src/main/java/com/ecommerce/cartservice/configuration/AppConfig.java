@@ -30,6 +30,14 @@ public class AppConfig {
         return environment.getProperty("product.catalog.service.endpoint");
     }
 
+    public String getOrderServiceEndpoint() {
+        return environment.getProperty("order.service.endpoint");
+    }
+
+    public String getPaymentServiceEndpoint() {
+        return environment.getProperty("payment.service.endpoint");
+    }
+
     @Bean
     public SecretKey getSecretKey(){
         MacAlgorithm algorithm = Jwts.SIG.HS256;

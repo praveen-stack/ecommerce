@@ -1,6 +1,8 @@
 package com.ecommerce.cartservice.controllers;
 
 import com.ecommerce.cartservice.dtos.CartRequest;
+import com.ecommerce.cartservice.dtos.CheckoutRequestDto;
+import com.ecommerce.cartservice.dtos.CheckoutResponseDto;
 import com.ecommerce.cartservice.dtos.AuthorizedUser;
 import com.ecommerce.cartservice.dtos.CartDto;
 import com.ecommerce.cartservice.dtos.ItemDto;
@@ -63,18 +65,8 @@ public class CartController {
     }
 
     @PostMapping("/checkout")
-    public CheckoutDto addToCart(Authentication authentication, @Valid @RequestBody CheckoutRequest checkoutRequest) {
+    public CheckoutResponseDto checkout(Authentication authentication, @Valid @RequestBody CheckoutRequestDto checkoutRequest) {
         AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
-        Cart cart;
-        if(cartRequest.getQuantity() > 0){
-            cart = cartService.addToCart(authUser, cartRequest.getProductId(), cartRequest.getQuantity());
-        }
-        else {
-            // if negative or 0 remove from cart
-            cart = cartService.removeFromCart(authUser, cartRequest.getProductId(), Optional.of(cartRequest.getQuantity() * -1));
-        }
-        return convertToDto(cart);
+        return cartService.checkout(authUser, checkoutRequest);
     }
-
-
 }

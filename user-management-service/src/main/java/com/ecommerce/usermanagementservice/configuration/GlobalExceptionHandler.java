@@ -1,6 +1,7 @@
 package com.ecommerce.usermanagementservice.configuration;
 
 import com.ecommerce.usermanagementservice.Exceptions.InvalidCredentialsException;
+import com.ecommerce.usermanagementservice.Exceptions.NotFoundException;
 import com.ecommerce.usermanagementservice.Exceptions.UnauthorizedException;
 import com.ecommerce.usermanagementservice.Exceptions.UserExistsException;
 import com.ecommerce.usermanagementservice.dtos.ErrorResponseDto;
@@ -43,6 +44,13 @@ public class GlobalExceptionHandler {
         var message = new ErrorResponseDto();
         message.setMessage(ex.getMessage());
         return new ResponseEntity<ErrorResponseDto>(message, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleNotFoundException(NotFoundException ex) {
+        var message = new ErrorResponseDto();
+        message.setMessage(ex.getMessage());
+        return new ResponseEntity<ErrorResponseDto>(message, HttpStatus.NOT_FOUND);
     }
 }
 

@@ -60,12 +60,21 @@ public class UserProfileController {
         AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
         userService.deleteAddress(authUser, id);
     }
+
+    @GetMapping("/addresses/{id}")
+    public AddressDto getAddressById(Authentication authentication, @PathVariable Long id) {
+        AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
+        Address address = userService.getAddressById(authUser, id);
+        return addressDtoMapper.toDto(address);
+    }
+
     @GetMapping("/addresses")
     public List<AddressDto> getAddresses(Authentication authentication) {
         AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
         List<Address> addresses = userService.getAddresses(authUser);
         return addresses.stream().map(addressDtoMapper::toDto).toList();
     }
+
     @PutMapping("/addresses")
     public AddressDto updateAddress(Authentication authentication, @RequestBody @Valid AddressDto dto) {
         AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();

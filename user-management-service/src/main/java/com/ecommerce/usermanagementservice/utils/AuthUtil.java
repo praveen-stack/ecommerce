@@ -41,8 +41,20 @@ public class AuthUtil {
         return authCookie.getValue();
     }
 
+    public String getAuthBearer(HttpServletRequest request) {
+        var header = request.getHeader("Authorization");
+        if(header != null && header.startsWith("Bearer ")){
+            return header.substring(7);
+        }
+        return null;
+    }
+
     public String getAuthToken(HttpServletRequest request) {
-        return getAuthCookie(request);
+        var token = getAuthCookie(request);
+        if(token != null){
+            return token;
+        }
+        return getAuthBearer(request);
     }
 
     public UsernamePasswordAuthenticationToken getAuthentication(User userDetails) {
