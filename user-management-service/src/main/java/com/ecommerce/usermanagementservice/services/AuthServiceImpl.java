@@ -31,6 +31,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private AuthUtil authUtil;
 
+    @Autowired
+    private EmailService emailService;
+
     @Override
     public User signup(User inputUser) throws UserExistsException {
         var existingUser = this.userRepository.findByEmail(inputUser.getEmail());
@@ -61,8 +64,7 @@ public class AuthServiceImpl implements AuthService {
         var existingUserOptional = this.userRepository.findByEmail(email);
         if(!existingUserOptional.isPresent()){
             throw new InvalidCredentialsException(MessageText.INCORRECT_EMAIL_PASSWORD.getValue());
-        }
-        String hashedPassword = passwordEncoder.encode(password);
+        }        
         var existintUser = existingUserOptional.get();
         if(!passwordEncoder.matches(password, existintUser.getPassword())){
             throw new InvalidCredentialsException(MessageText.INCORRECT_EMAIL_PASSWORD.getValue());
@@ -119,5 +121,8 @@ public class AuthServiceImpl implements AuthService {
         tokenObj.setExpiryDate(expiryDate);
         tokenObj.setUser(user);
         passwordResetTokenRepository.save(tokenObj);
+        
+        // Send password reset email
+        emailService.sendPasswordResetEmail(email, token);
     }
 }

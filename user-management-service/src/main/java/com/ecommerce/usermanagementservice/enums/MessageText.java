@@ -1,14 +1,16 @@
 package com.ecommerce.usermanagementservice.enums;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor // Generates constructor for final fields
+@Getter
 public enum MessageText {
     INCORRECT_EMAIL_PASSWORD("Incorrect email or password.");
 
-    @Getter // Generates the getter for this field
     private final String value;
+
+    MessageText(String value) {
+        this.value = value;
+    }
 
     // Optional: a method to get the enum from the string value
     public static MessageText fromString(String text) {
