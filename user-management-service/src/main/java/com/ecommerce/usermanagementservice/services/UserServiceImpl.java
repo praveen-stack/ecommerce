@@ -1,5 +1,6 @@
 package com.ecommerce.usermanagementservice.services;
 
+import com.ecommerce.usermanagementservice.Exceptions.NotFoundException;
 import com.ecommerce.usermanagementservice.Exceptions.UserExistsException;
 import com.ecommerce.usermanagementservice.dtos.AuthorizedUser;
 import com.ecommerce.usermanagementservice.enums.UserState;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+
+import javax.naming.NameNotFoundException;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -84,5 +87,15 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteAddress(AuthorizedUser user, Long addressId) {
         this.addressRepository.deleteByIdAndUserId(addressId, user.getId());
+    }
+
+    @Override
+    public Address getAddressById(AuthorizedUser user, Long addressId) {
+        User dbUser = getValidUserById(user.getId());
+        var address = addressRepository.findById(addressId);
+        if(!address.isPresent() || !address.get().getUser().getId().equals(dbUser.getId())){
+            throw new NotFoundException("Address not found");
+        }
+        return address.get();
     }
 }

@@ -18,4 +18,6 @@ public interface UserService {
     void deleteAddress(AuthorizedUser user, Long addressId);
 
     User getValidUserById(Long id);
+
+    Address getAddressById(AuthorizedUser user, Long addressId);
 }

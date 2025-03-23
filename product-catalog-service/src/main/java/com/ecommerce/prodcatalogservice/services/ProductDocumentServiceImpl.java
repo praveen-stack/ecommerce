@@ -59,7 +59,7 @@ public class ProductDocumentServiceImpl implements ProductDocumentService {
                                 }
                                 if(productIds != null && productIds.size() > 0){
                                     List<FieldValue> fieldValues = productIds.stream()
-                                            .map(FieldValue::of)
+                                            .map(id -> FieldValue.of(id.toString()))
                                             .collect(Collectors.toList());
 
                                     TermsQuery tq = TermsQuery.of(b-> b.field("id").terms(t -> t.value(fieldValues)));

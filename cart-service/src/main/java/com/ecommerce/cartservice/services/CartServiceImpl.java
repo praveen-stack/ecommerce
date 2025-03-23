@@ -1,7 +1,8 @@
 package com.ecommerce.cartservice.services;
 
-import com.ecommerce.cartservice.dtos.AuthorizedUser;
-import com.ecommerce.cartservice.dtos.Product;
+import com.ecommerce.cartservice.configuration.AppConfig;
+import com.ecommerce.cartservice.dtos.*;
+import com.ecommerce.cartservice.exceptions.BadRequestException;
 import com.ecommerce.cartservice.models.Cart;
 import com.ecommerce.cartservice.models.Item;
 import com.ecommerce.cartservice.repositories.CartRepository;
@@ -17,13 +18,17 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class CartServiceImpl implements CartService{
+public class CartServiceImpl implements CartService {
 
     @Autowired
     private CartRepository cartRepository;
 
+
     @Autowired
-    private ModelMapper modelMapper;
+    private OrderService orderService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     private static final String CART_CACHE_KEY = "#user.id";
 
@@ -91,5 +96,47 @@ public class CartServiceImpl implements CartService{
         Cart cart = getCartByUserId(userId);
         refreshCartDetails(cart, user);
         return cart;
+    }
+
+    @Override
+    @Transactional
+    public CheckoutResponseDto checkout(AuthorizedUser user, CheckoutRequestDto checkoutRequest) {
+        // Get the current cart
+        Cart cart = getCart(user);
+        
+        if (cart.getItems().isEmpty()) {
+            throw new BadRequestException("Cart is empty");
+        }
+
+        // Create order request
+        CreateOrderDto createOrderRequest = new CreateOrderDto();
+        createOrderRequest.setBillingAddressId(checkoutRequest.getBillingAddressId());
+        createOrderRequest.setShippingAddressId(checkoutRequest.getShippingAddressId());
+        createOrderRequest.setPaymentMethod(checkoutRequest.getPaymentMethod());
+        createOrderRequest.setItems(cart.getItems().stream().map(item -> {
+            CreateOrderItemDto orderItem = new CreateOrderItemDto();
+            orderItem.setProductId(item.getProductId());
+            orderItem.setQuantity(item.getQuantity());
+            orderItem.setPrice(item.getProduct().getPrice());
+            return orderItem;
+        }).toList());
+
+        // Create order using OrderService
+        OrderDto order = orderService.createOrder(user, createOrderRequest);
+
+        // Clear the cart after successful order creation
+        cartRepository.delete(cart);
+
+        // Create and return checkout response
+        CheckoutResponseDto response = new CheckoutResponseDto();
+        response.setOrder(order);
+        
+        // Get payment details using the payment ID from the order
+        if (order.getPaymentId() != null) {
+            PaymentDto payment = paymentService.getPaymentById(user, order.getPaymentId());
+            response.setPayment(payment);
+        }
+        
+        return response;
     }
 }

@@ -26,26 +26,26 @@ public class KafkaConfig {
     @Value("${kafka.group-id}")
     private String groupId;
 
-    @Value("${kafka.sasl.jaas.config}")
-    private String saslJaasConfig;
-
-    @Value("${ssl.truststore.location}")
-    private String sslTruststoreLocation;
-
-    @Value("${ssl.truststore.password}")
-    private String sslTruststorePassword;
-
+//    @Value("${kafka.sasl.jaas.config}")
+//    private String saslJaasConfig;
+//
+//    @Value("${ssl.truststore.location}")
+//    private String sslTruststoreLocation;
+//
+//    @Value("${ssl.truststore.password}")
+//    private String sslTruststorePassword;
+//
 
 
     private void addDefaultProps(Map<String, Object> props) {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(SaslConfigs.SASL_JAAS_CONFIG, saslJaasConfig);
-        props.put("security.protocol", "SASL_SSL");
-        props.put(SaslConfigs.SASL_MECHANISM, "SCRAM-SHA-256");
-        props.put("ssl.truststore.location", sslTruststoreLocation);
-        props.put("ssl.truststore.password", sslTruststorePassword);
-        props.put("ssl.endpoint.identification.algorithm", "");
-        props.put("ssl.truststore.type", "jks");
+//        props.put(SaslConfigs.SASL_JAAS_CONFIG, saslJaasConfig);
+//        props.put("security.protocol", "SASL_SSL");
+//        props.put(SaslConfigs.SASL_MECHANISM, "SCRAM-SHA-256");
+//        props.put("ssl.truststore.location", sslTruststoreLocation);
+//        props.put("ssl.truststore.password", sslTruststorePassword);
+//        props.put("ssl.endpoint.identification.algorithm", "");
+//        props.put("ssl.truststore.type", "jks");
     }
     private Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();

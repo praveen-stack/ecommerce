@@ -16,6 +16,7 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private AppConfig appConfig;
+    
     public Address getAddressById(Long addressId, AuthorizedUser user) {
         var endpoint = appConfig.getUserServiceEndpoint();
         RestTemplate restTemplate = new RestTemplate();
@@ -24,7 +25,7 @@ public class UserServiceImpl implements UserService{
                 .header("Authorization", "Bearer " + user.getJwt())
                 .build();
         var response = restTemplate.exchange(requestEntity, Address.class);
-        if(response.getStatusCode() != HttpStatus.NOT_FOUND) {
+        if(response.getStatusCode() == HttpStatus.NOT_FOUND) {
             throw new NotFoundException("Address not found");
         }
         return response.getBody();

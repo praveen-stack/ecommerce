@@ -1,5 +1,6 @@
 package com.ecommerce.cartservice.configuration;
 
+import com.ecommerce.cartservice.exceptions.BadRequestException;
 import com.ecommerce.cartservice.exceptions.NotFoundException;
 import com.ecommerce.cartservice.exceptions.UnauthorizedException;
 import com.ecommerce.cartservice.dtos.ErrorResponseDto;
@@ -35,6 +36,13 @@ public class GlobalExceptionHandler {
         var message = new ErrorResponseDto();
         message.setMessage(ex.getMessage());
         return new ResponseEntity<ErrorResponseDto>(message, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponseDto> handleBadRequestException(BadRequestException ex) {
+        var message = new ErrorResponseDto();
+        message.setMessage(ex.getMessage());
+        return new ResponseEntity<ErrorResponseDto>(message, HttpStatus.BAD_REQUEST);
     }
 
 }

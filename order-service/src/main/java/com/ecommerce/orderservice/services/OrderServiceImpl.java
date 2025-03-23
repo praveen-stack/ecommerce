@@ -50,6 +50,7 @@ public class OrderServiceImpl implements OrderService{
         order.setBillingAddress(billingAddress);
         order.setShippingAddress(shippingAddress);
         order.setStatus(OrderStatus.PENDING);
+        order.setUserId(user.getId());
         double orderTotal = 0d;
         for(var item: order.getItems()){
             double itemTotal = item.getQuantity() * item.getPrice();
@@ -58,6 +59,7 @@ public class OrderServiceImpl implements OrderService{
             item.setProductDescription(product.getDescription());
             item.setProductImage(product.getImage());
             item.setProductTitle(product.getTitle());
+            item.setOrder(order);
             orderTotal += itemTotal;
         }
         order.setTotalAmount(orderTotal);
