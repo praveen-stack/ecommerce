@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
@@ -70,5 +71,14 @@ public class OrderController {
         AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
         Order order = orderService.getOrder(authUser,id);
         return toDto(order);
+    }
+
+    @GetMapping
+    public List<OrderDto> getAllOrders(Authentication authentication) {
+        AuthorizedUser authUser = (AuthorizedUser) authentication.getPrincipal();
+        List<Order> orders = orderService.getAllOrders(authUser);
+        return orders.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 }

@@ -1,15 +1,14 @@
 package com.ecommerce.cartservice.services;
 
-import com.ecommerce.cartservice.configuration.AppConfig;
 import com.ecommerce.cartservice.dtos.*;
 import com.ecommerce.cartservice.exceptions.BadRequestException;
 import com.ecommerce.cartservice.models.Cart;
 import com.ecommerce.cartservice.models.Item;
 import com.ecommerce.cartservice.repositories.CartRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -100,6 +99,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "cartCache", key = CART_CACHE_KEY)
     public CheckoutResponseDto checkout(AuthorizedUser user, CheckoutRequestDto checkoutRequest) {
         // Get the current cart
         Cart cart = getCart(user);
@@ -125,7 +125,7 @@ public class CartServiceImpl implements CartService {
         OrderDto order = orderService.createOrder(user, createOrderRequest);
 
         // Clear the cart after successful order creation
-        cartRepository.delete(cart);
+        clearCart(user);
 
         // Create and return checkout response
         CheckoutResponseDto response = new CheckoutResponseDto();
@@ -138,5 +138,14 @@ public class CartServiceImpl implements CartService {
         }
         
         return response;
+    }
+
+    @Override    
+    public void clearCart(AuthorizedUser user) {
+        var userId = user.getId();
+        Cart cart = getCartByUserId(userId);
+        if (cart != null) {
+            cartRepository.delete(cart);
+        }
     }
 }

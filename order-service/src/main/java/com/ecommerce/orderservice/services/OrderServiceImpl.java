@@ -88,4 +88,10 @@ public class OrderServiceImpl implements OrderService{
         return order;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<Order> getAllOrders(AuthorizedUser user) {
+        return orderRepository.findByUserId(user.getId());
+    }
+
 }
