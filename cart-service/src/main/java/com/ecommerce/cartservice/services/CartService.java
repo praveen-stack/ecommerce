@@ -11,4 +11,5 @@ public interface CartService {
     Cart removeFromCart(AuthorizedUser user, Long productId, Optional<Integer> quantityOptional);
     Cart getCart(AuthorizedUser user);
     CheckoutResponseDto checkout(AuthorizedUser user, CheckoutRequestDto checkoutRequest);
+    void clearCart(AuthorizedUser user);
 }
