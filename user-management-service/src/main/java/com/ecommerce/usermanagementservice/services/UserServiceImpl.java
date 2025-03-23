@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getValidUserById(Long id) {
         var user = userRepository.findById(id);
-        if(user==null){
+        if(!user.isPresent()){
             return null;
         }
 

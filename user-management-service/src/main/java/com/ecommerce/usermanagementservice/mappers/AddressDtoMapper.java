@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class AddressDtoMapper extends ObjectMapper<AddressDto, Address> {
     @Override
-    public Class getDtoClass() {
+    public Class<AddressDto> getDtoClass() {
         return AddressDto.class;
     }
 
     @Override
-    public Class getEntityClass() {
+    public Class<Address> getEntityClass() {
         return Address.class;
     }
 }
