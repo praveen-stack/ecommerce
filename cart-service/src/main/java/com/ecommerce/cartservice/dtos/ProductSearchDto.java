@@ -1,9 +1,13 @@
 package com.ecommerce.cartservice.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import lombok.Data;
+
 import java.util.List;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Data
 public class ProductSearchDto {
     public ProductSearchDto () {
         this.pageSize = 10;

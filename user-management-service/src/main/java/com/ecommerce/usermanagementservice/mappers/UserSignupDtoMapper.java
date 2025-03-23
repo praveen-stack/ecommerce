@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserSignupDtoMapper extends ObjectMapper<UserSignupDto, User> {
     @Override
-    public Class getDtoClass() {
+    public Class<UserSignupDto> getDtoClass() {
         return UserSignupDto.class;
     }
 
     @Override
-    public Class getEntityClass() {
+    public Class<User> getEntityClass() {
         return User.class;
     }
 }

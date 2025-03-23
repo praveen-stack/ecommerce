@@ -27,17 +27,7 @@ public class SendGridEmailServiceImpl implements EmailService {
     @Value("${app.frontend-url}")
     private String frontendUrl;
 
-    @Override
-    public void sendPasswordResetEmail(String to, String resetToken) {
-        Email from = new Email(fromEmail);
-        Email toEmail = new Email(to);
-        String subject = "Password Reset Request";
-        String resetLink = frontendUrl + "/reset-password?token=" + resetToken;
-        String contentText = "Click the link below to reset your password. This link will expire in 1 hour.\n\n" +
-                resetLink + "\n\n" +
-                "If you didn't request this password reset, please ignore this email.";
-        Content content = new Content("text/plain", contentText);
-        Mail mail = new Mail(from, subject, toEmail, content);
+    private void sendEmail(Mail mail, String recipientEmail, String emailType) {
         Request request = new Request();
         request.setMethod(Method.POST);
         request.setEndpoint("mail/send");
@@ -49,9 +39,24 @@ public class SendGridEmailServiceImpl implements EmailService {
                 throw new RuntimeException("Failed to send email. Status code: " + response.getStatusCode());
             }
             
-            log.info("Password reset email sent successfully to: {}", toEmail.getEmail());
+            log.info("{} email sent successfully to: {}", emailType, recipientEmail);
         } catch (IOException e) {
             throw new RuntimeException("Failed to send email", e);
         }
+    }
+
+    @Override
+    public void sendPasswordResetEmail(String to, String resetToken) {
+        Email from = new Email(fromEmail);
+        Email toEmail = new Email(to);
+        String subject = "Password Reset Request";
+        String resetLink = frontendUrl + "/reset-password?token=" + resetToken;
+        String contentText = "Click the link below to reset your password. This link will expire in 1 hour.\n\n" +
+                resetLink + "\n\n" +
+                "If you didn't request this password reset, please ignore this email.";
+        Content content = new Content("text/plain", contentText);
+        Mail mail = new Mail(from, subject, toEmail, content);
+        
+        sendEmail(mail, toEmail.getEmail(), "Password reset");
     }
 } 

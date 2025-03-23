@@ -22,6 +22,9 @@ public class Order extends BaseModel {
     private Long userId;
 
     @Column(nullable = false)
+    private String userEmail;
+    
+    @Column(nullable = false)
     private OrderStatus status;
 
     @Column(nullable = true)

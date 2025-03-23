@@ -9,7 +9,6 @@ import com.ecommerce.cartservice.dtos.ItemDto;
 import com.ecommerce.cartservice.models.Cart;
 import com.ecommerce.cartservice.services.CartService;
 import jakarta.validation.Valid;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
@@ -24,8 +23,6 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    @Autowired
-    private ModelMapper modelMapper;
 
     private CartDto convertToDto(Cart cart) {
         CartDto cartDto = new CartDto();

@@ -54,6 +54,7 @@ public class AuthControllerIntegrationTest {
         loginDto.setEmail(dto.getEmail());
         loginDto.setPassword(dto.getPassword());
         var responseEntity = authController.login(loginDto);
+        assertNotNull(responseEntity.getBody());
         assertEquals(responseEntity.getBody().getEmail(), loginDto.getEmail());
         assertNotNull(responseEntity.getHeaders().get(HttpHeaders.SET_COOKIE));
     }
