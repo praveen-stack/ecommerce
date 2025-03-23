@@ -8,6 +8,23 @@
             "hostName": "localhost",
             "port": 5005,
             "projectName": "cart-service"
+        },
+        {
+            "type": "java",
+            "name": "Attach to User Management Service",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 5005,
+            "projectName": "user-management-service"
+        },
+        {
+            "type": "java",
+            "name": "Debug User Management Service",
+            "request": "launch",
+            "mainClass": "com.ecommerce.usermanagementservice.UserManagementServiceApplication",
+            "projectName": "user-management-service",
+            "vmArgs": "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
+            "cwd": "${workspaceFolder}/user-management-service"
         }
     ]
 } 
