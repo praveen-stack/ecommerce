@@ -1,4 +1,4 @@
-package com.ecommerce.orderservice.configuration;
+package com.ecommerce.notificationservice.configuration;
 
 import com.sendgrid.SendGrid;
 import org.springframework.beans.factory.annotation.Value;

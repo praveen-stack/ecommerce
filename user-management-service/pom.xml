@@ -112,11 +112,9 @@
             <artifactId>hibernate-validator</artifactId>
             <version>7.0.4.Final</version> <!-- Use the appropriate version -->
         </dependency>
-
         <dependency>
-            <groupId>com.sendgrid</groupId>
-            <artifactId>sendgrid-java</artifactId>
-            <version>4.9.3</version>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
 
     </dependencies>
