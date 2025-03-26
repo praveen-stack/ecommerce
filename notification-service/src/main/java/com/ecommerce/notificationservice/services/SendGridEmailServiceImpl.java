@@ -1,4 +1,4 @@
-package com.ecommerce.orderservice.services;
+package com.ecommerce.notificationservice.services;
 
 import com.sendgrid.Method;
 import com.sendgrid.Request;
@@ -10,7 +10,7 @@ import com.sendgrid.helpers.mail.objects.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.ecommerce.orderservice.enums.OrderStatus;
+import com.ecommerce.notificationservice.enums.OrderStatus;
 
 import java.io.IOException;
 
@@ -96,6 +96,21 @@ public class SendGridEmailServiceImpl implements EmailService {
         Content content = new Content("text/plain", contentText);
         Mail mail = new Mail(from, subject, toEmail, content);
         sendEmail(mail, toEmail.getEmail(), "Order processing");
+    }
+
+    @Override
+    public void sendPasswordResetEmail(String to, String resetToken) {
+        Email from = new Email(fromEmail);
+        Email toEmail = new Email(to);
+        String subject = "Password Reset Request";
+        String resetLink = frontendUrl + "/reset-password?token=" + resetToken;
+        String contentText = "Click the link below to reset your password. This link will expire in 1 hour.\n\n" +
+                resetLink + "\n\n" +
+                "If you didn't request this password reset, please ignore this email.";
+        Content content = new Content("text/plain", contentText);
+        Mail mail = new Mail(from, subject, toEmail, content);
+        
+        sendEmail(mail, toEmail.getEmail(), "Password reset");
     }
 
 } 

@@ -5,6 +5,8 @@ import com.ecommerce.usermanagementservice.Exceptions.UnauthorizedException;
 import com.ecommerce.usermanagementservice.Exceptions.UserExistsException;
 import com.ecommerce.usermanagementservice.dtos.AuthenticatedUser;
 import com.ecommerce.usermanagementservice.dtos.AuthorizedUser;
+import com.ecommerce.usermanagementservice.dtos.PasswordResetMessage;
+import com.ecommerce.usermanagementservice.enums.KafkaTopics;
 import com.ecommerce.usermanagementservice.enums.MessageText;
 import com.ecommerce.usermanagementservice.enums.UserState;
 import com.ecommerce.usermanagementservice.models.PasswordResetToken;
@@ -12,10 +14,14 @@ import com.ecommerce.usermanagementservice.models.User;
 import com.ecommerce.usermanagementservice.repositories.PasswordResetTokenRepository;
 import com.ecommerce.usermanagementservice.repositories.UserRepository;
 import com.ecommerce.usermanagementservice.utils.AuthUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.kafka.core.KafkaTemplate;
 import java.util.*;
 
 @Service
@@ -32,7 +38,8 @@ public class AuthServiceImpl implements AuthService {
     private AuthUtil authUtil;
 
     @Autowired
-    private EmailService emailService;
+    private KafkaTemplate<String, String> kafkaTemplate;
+
 
     @Override
     public User signup(User inputUser) throws UserExistsException {
@@ -123,6 +130,16 @@ public class AuthServiceImpl implements AuthService {
         passwordResetTokenRepository.save(tokenObj);
         
         // Send password reset email
-        emailService.sendPasswordResetEmail(email, token);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        PasswordResetMessage passwordResetMessage = new PasswordResetMessage();
+        passwordResetMessage.setEmail(email);
+        passwordResetMessage.setToken(token);        
+        try {
+            String message = objectMapper.writeValueAsString(passwordResetMessage);
+            kafkaTemplate.send(KafkaTopics.PASSWORD_RESET_REQUEST, message);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send password reset request to Kafka", e);
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.ecommerce.paymentservice.enums;
+package com.ecommerce.notificationservice.enums;
 
 public final class KafkaTopics {
 
@@ -10,4 +10,5 @@ public final class KafkaTopics {
     public static final String ORDER_PROCESSING = "order-processing";
     public static final String ORDER_CONFIRMATION = "order-confirmation";
     public static final String ORDER_PAYMENT_FAILED = "order-payment-failed";
+
 }

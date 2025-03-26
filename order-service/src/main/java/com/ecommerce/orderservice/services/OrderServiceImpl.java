@@ -3,14 +3,17 @@ package com.ecommerce.orderservice.services;
 import com.ecommerce.orderservice.Repositories.OrderRepository;
 import com.ecommerce.orderservice.dtos.AuthorizedUser;
 import com.ecommerce.orderservice.dtos.CreatePaymentDto;
+import com.ecommerce.orderservice.dtos.OrderDto;
+import com.ecommerce.orderservice.dtos.OrderUpdateMessage;
 import com.ecommerce.orderservice.dtos.Payment;
 import com.ecommerce.orderservice.dtos.Product;
+import com.ecommerce.orderservice.enums.KafkaTopics;
 import com.ecommerce.orderservice.enums.OrderStatus;
 import com.ecommerce.orderservice.enums.PaymentMethod;
 import com.ecommerce.orderservice.exceptions.NotFoundException;
 import com.ecommerce.orderservice.models.Address;
 import com.ecommerce.orderservice.models.Order;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ecommerce.orderservice.utils.OrderHelper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.kafka.core.KafkaTemplate;
 
 @Service
-public class OrderServiceImpl implements OrderService{
+public class OrderServiceImpl implements OrderService {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
 
@@ -45,16 +49,17 @@ public class OrderServiceImpl implements OrderService{
     private PaymentService paymentService;
 
     @Autowired
-    private EmailService emailService;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     @Override
     @Transactional
-    public Order createOrder(AuthorizedUser user, Order order, Long billingAddressId, Long shippingAddressId, PaymentMethod paymentMethod) {
+    public Order createOrder(AuthorizedUser user, Order order, Long billingAddressId, Long shippingAddressId,
+            PaymentMethod paymentMethod) {
 
         Set<Long> productIds = order.getItems().stream().map(i -> i.getProductId()).collect(Collectors.toSet());
         List<Product> products = productCatalogService.getProductsByIds(productIds.stream().toList(), user.getJwt());
         Map<Long, Product> productsMap = new HashMap<>();
-        for (var product : products){
+        for (var product : products) {
             productsMap.put(product.getId(), product);
         }
 
@@ -65,7 +70,7 @@ public class OrderServiceImpl implements OrderService{
         order.setStatus(OrderStatus.PENDING);
         order.setUserId(user.getId());
         double orderTotal = 0d;
-        for(var item: order.getItems()){
+        for (var item : order.getItems()) {
             double itemTotal = item.getQuantity() * item.getPrice();
             var product = productsMap.get(item.getProductId());
             item.setTotalAmount(itemTotal);
@@ -85,7 +90,12 @@ public class OrderServiceImpl implements OrderService{
         Payment payment = paymentService.createPayment(user, createPaymentDto);
         order.setPaymentId(payment.getId());
         orderRepository.save(order);
-        emailService.sendOrderConfirmationEmail(order.getUserEmail(), order.getId().toString(), order.getTotalAmount());
+        OrderUpdateMessage orderUpdateMessage = createOrderUpdateMessage(order, payment);
+        try {
+            kafkaTemplate.send(KafkaTopics.ORDER_CONFIRMATION, objectMapper.writeValueAsString(orderUpdateMessage));
+        } catch (Exception e) {
+            logger.error("Error sending order confirmation message: {}", e.getMessage());
+        }
         return order;
     }
 
@@ -93,11 +103,11 @@ public class OrderServiceImpl implements OrderService{
     @Transactional(readOnly = true)
     public Order getOrder(AuthorizedUser user, Long orderId) {
         var orderOptional = orderRepository.findById(orderId);
-        if(orderOptional.isEmpty()){
+        if (orderOptional.isEmpty()) {
             throw new NotFoundException("Order not found");
         }
         var order = orderOptional.get();
-        if(!order.getUserId().equals(user.getId())){
+        if (!order.getUserId().equals(user.getId())) {
             throw new NotFoundException("Order not found");
         }
         return order;
@@ -109,32 +119,52 @@ public class OrderServiceImpl implements OrderService{
         return orderRepository.findByUserId(user.getId());
     }
 
-
-    @KafkaListener(topics = "PAYMENT_UPDATE")
-    public void listen(String message) throws JsonProcessingException {
+    @KafkaListener(topics = KafkaTopics.PAYMENT_UPDATE)
+    public void listen(String message) {
         logger.info("Received payment update event: {}", message);
-        Payment payment = objectMapper.readValue(message, Payment.class);                
-        logger.info("Processing payment update for paymentId: {} with status: {}", payment.getId(), payment.getStatus());
-        // update order status
-        var orderOptional = orderRepository.findById(payment.getOrderId());
-        if(orderOptional.isEmpty()){
-            throw new NotFoundException("Order not found");
+        try {
+            Payment payment = objectMapper.readValue(message, Payment.class);
+            logger.info("Processing payment update for paymentId: {} with status: {}", payment.getId(),
+                    payment.getStatus());
+            // update order status
+            var orderOptional = orderRepository.findById(payment.getOrderId());
+            if (orderOptional.isEmpty()) {
+                throw new NotFoundException("Order not found");
+            }
+            var order = orderOptional.get();
+            OrderUpdateMessage orderUpdateMessage;
+            switch (payment.getStatus()) {
+                case SUCCESS:
+                    order.setStatus(OrderStatus.CONFIRMED);
+                    orderRepository.save(order);
+                    orderUpdateMessage = createOrderUpdateMessage(order, payment);
+                    kafkaTemplate.send(KafkaTopics.ORDER_PROCESSING,
+                            objectMapper.writeValueAsString(orderUpdateMessage));
+
+                    break;
+                case FAILED:
+                    order.setStatus(OrderStatus.PAYMENT_FAILED);
+                    orderRepository.save(order);
+                    orderUpdateMessage = createOrderUpdateMessage(order, payment);
+                    kafkaTemplate.send(KafkaTopics.ORDER_PAYMENT_FAILED,
+                            objectMapper.writeValueAsString(orderUpdateMessage));
+
+                    break;
+                default:
+                    break;
+            }
+            logger.info("Order status updated to: {}", order.getStatus());
+        } catch (Exception e) {
+            logger.error("Error sending order payment failed message: {}", e.getMessage());
         }
-        var order = orderOptional.get();
-        switch (payment.getStatus()) {
-            case SUCCESS:
-                order.setStatus(OrderStatus.CONFIRMED);
-                emailService.sendOrderProcessingEmail(order.getUserEmail(), order.getId().toString(), order.getStatus(), payment.getPaymentLink());
-                orderRepository.save(order);
-                break;
-            case FAILED:
-                order.setStatus(OrderStatus.PAYMENT_FAILED);
-                emailService.sendPaymentFailedEmail(order.getUserEmail(), order.getId().toString(), order.getStatus(), payment.getPaymentLink());
-                break;
-            default:
-                break;
-        }        
-        logger.info("Order status updated to: {}", order.getStatus());        
+    }
+
+    private OrderUpdateMessage createOrderUpdateMessage(Order order, Payment payment) {
+        OrderUpdateMessage orderUpdateMessage = new OrderUpdateMessage();
+        OrderDto orderDto = OrderHelper.toDto(order);
+        orderUpdateMessage.setOrder(orderDto);
+        orderUpdateMessage.setPayment(payment);
+        return orderUpdateMessage;
     }
 
 }
