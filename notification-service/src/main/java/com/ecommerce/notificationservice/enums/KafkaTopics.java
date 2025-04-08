@@ -10,5 +10,5 @@ public final class KafkaTopics {
     public static final String ORDER_PROCESSING = "order-processing";
     public static final String ORDER_CONFIRMATION = "order-confirmation";
     public static final String ORDER_PAYMENT_FAILED = "order-payment-failed";
-
+    public static final String USER_ONBOARDING = "user-onboarding";
 }

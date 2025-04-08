@@ -6,6 +6,7 @@ import com.ecommerce.usermanagementservice.Exceptions.UserExistsException;
 import com.ecommerce.usermanagementservice.dtos.AuthenticatedUser;
 import com.ecommerce.usermanagementservice.dtos.AuthorizedUser;
 import com.ecommerce.usermanagementservice.dtos.PasswordResetMessage;
+import com.ecommerce.usermanagementservice.dtos.UserDto;
 import com.ecommerce.usermanagementservice.enums.KafkaTopics;
 import com.ecommerce.usermanagementservice.enums.MessageText;
 import com.ecommerce.usermanagementservice.enums.UserState;
@@ -41,6 +42,24 @@ public class AuthServiceImpl implements AuthService {
     private KafkaTemplate<String, String> kafkaTemplate;
 
 
+    private void sendUserOnboardingEvent(User user){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            UserDto dto = new UserDto();
+            dto.setId(user.getId());
+            dto.setEmail(user.getEmail());
+            dto.setName(user.getName());
+            dto.setPhoneNumber(user.getPhoneNumber());
+            dto.setCreatedAt(user.getCreatedAt());
+            dto.setUpdatedAt(user.getUpdatedAt());            
+            String message = objectMapper.writeValueAsString(dto);
+            kafkaTemplate.send(KafkaTopics.USER_ONBOARDING, message);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send user onboarding request to Kafka", e);
+        }
+    }
+
     @Override
     public User signup(User inputUser) throws UserExistsException {
         var existingUser = this.userRepository.findByEmail(inputUser.getEmail());
@@ -58,6 +77,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPhoneNumber(inputUser.getPhoneNumber());
         user.setState(UserState.ACTIVE);
         userRepository.save(user);
+        sendUserOnboardingEvent(user);
         return user;
     }
 
