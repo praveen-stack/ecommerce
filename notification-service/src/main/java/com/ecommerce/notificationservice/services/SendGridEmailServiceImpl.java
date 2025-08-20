@@ -52,11 +52,9 @@ public class SendGridEmailServiceImpl implements EmailService {
         Email from = new Email(fromEmail);
         Email toEmail = new Email(to);
         String subject = "Order Confirmation";
-        String orderLink = frontendUrl + "/orders/" + orderId;
         String contentText = "Thank you for your order! Your order has been confirmed.\n\n" +
                 "Order ID: " + orderId + "\n" +
                 "Total Amount: $" + String.format("%.2f", totalAmount) + "\n\n" +
-                "You can view your order details here: " + orderLink + "\n\n" +
                 "If you have any questions, please contact our support team.";
         Content content = new Content("text/plain", contentText);
         Mail mail = new Mail(from, subject, toEmail, content);
@@ -69,11 +67,9 @@ public class SendGridEmailServiceImpl implements EmailService {
         Email from = new Email(fromEmail);
         Email toEmail = new Email(to);
         String subject = "Payment Failed";
-        String orderLink = frontendUrl + "/orders/" + orderId;
         String contentText = "Your payment has failed. Please try again.\n\n" +
                 "Order ID: " + orderId + "\n" +
                 "New Status: " + status + "\n\n" +
-                "You can view your order details here: " + orderLink + "\n\n" +
                 "You can retry payment here: " + paymentLink + "\n\n" +
                 "If you have any questions, please contact our support team.";
         Content content = new Content("text/plain", contentText);
@@ -86,12 +82,9 @@ public class SendGridEmailServiceImpl implements EmailService {
         Email from = new Email(fromEmail);
         Email toEmail = new Email(to);
         String subject = "Order Processing";
-        String orderLink = frontendUrl + "/orders/" + orderId;
-        String contentText = "Your order is being processed and payment is successful. Please wait for it to be shipped.\n\n" +
+        String contentText = "Your payment is successful. Your order will be shipped soon.\n" +
                 "Order ID: " + orderId + "\n" +
                 "New Status: " + status + "\n\n" +
-                "You can view your order details here: " + orderLink + "\n\n" +
-                "You can view your payment receipt here: " + paymentLink + "\n\n" +
                 "If you have any questions, please contact our support team.";
         Content content = new Content("text/plain", contentText);
         Mail mail = new Mail(from, subject, toEmail, content);
@@ -111,6 +104,21 @@ public class SendGridEmailServiceImpl implements EmailService {
         Mail mail = new Mail(from, subject, toEmail, content);
         
         sendEmail(mail, toEmail.getEmail(), "Password reset");
+    }
+
+    @Override
+    public void sendOnboardingEmail(String to, String name) {
+        Email from = new Email(fromEmail);
+        Email toEmail = new Email(to);
+        String subject = "Welcome to Our E-commerce Platform";
+        String contentText = "Dear " + name + ",\n" +
+                "Welcome to our platform.\n" +
+                "Please contact support if you have any questions.\n" +
+                "Happy shopping!\n";
+        Content content = new Content("text/plain", contentText);
+        Mail mail = new Mail(from, subject, toEmail, content);
+        
+        sendEmail(mail, toEmail.getEmail(), "Onboarding");
     }
 
 } 
